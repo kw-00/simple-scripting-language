@@ -1,4 +1,4 @@
-
+A simple scripting language with JFlex and CUP.
 
 Compatible with Java 17.
 
