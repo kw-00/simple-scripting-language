@@ -1,1 +1,0 @@
-java -cp "${classpath}" "${src_path}/Main"

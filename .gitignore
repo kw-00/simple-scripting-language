@@ -11,7 +11,7 @@
 .mtj.tmp/
 
 # Package Files #
-*.jar
+# *.jar # Keep .jar dependencies
 *.war
 *.nar
 *.ear
@@ -26,3 +26,5 @@ replay_pid*
 amazon-corretto-17.0.17.10.1-linux-x64/
 jflex-1.9.1/
 *.java~
+
+src/java/*
