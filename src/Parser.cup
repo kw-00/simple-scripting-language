@@ -5,8 +5,7 @@ terminal Integer   NUMBER;
 
 non terminal Integer    expr;
 
-precedence left PLUS;
-precedence left TIMES;
+precedence left PLUS, TIMES;
 
 expr      ::= expr:e1 PLUS expr:e2
 	      {: RESULT = e1 + e2; :}
