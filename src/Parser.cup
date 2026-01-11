@@ -1,16 +1,39 @@
 import java_cup.runtime.*;
 
-terminal           PLUS, TIMES;
-terminal Integer   NUMBER;
+/* TERMINAL */
+terminal
+	ECHO, SEMICOLON
+;
 
-non terminal Integer    expr;
+terminal String
+	TOKEN
+;
 
-precedence left PLUS, TIMES;
+/* NON TERMINAL */
+non terminal String
+	statement_list, statement, token_list
+;
 
-expr      ::= expr:e1 PLUS expr:e2
-	      {: RESULT = e1 + e2; :}
-	      | expr:e1 TIMES expr:e2
-	      {: RESULT = e1 * e2; :}
-	      | NUMBER:n
-	      {: RESULT = n; :} 
-	      ;
+
+/* PRODUCTION */
+statement_list ::=
+	statement
+	| statement_list statement
+;
+
+statement ::=
+	ECHO token_list:tl SEMICOLON
+	{: System.out.println(tl); :}
+;
+
+token_list ::=
+	TOKEN:t 
+	{: RESULT = t; :}
+	| token_list:tl TOKEN:t
+	{: RESULT = tl + " " + t; :}
+;
+
+
+
+
+

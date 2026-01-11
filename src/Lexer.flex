@@ -2,12 +2,21 @@ import java_cup.runtime.*;
 
 %%
 
-%cup 
 %class Lexer
+%cup
 
 %%
 
-"+"			{ return new Symbol(sym.PLUS); }
-"*"			{ return new Symbol(sym.TIMES); }
-[0-9]+	    		{ return new Symbol(sym.NUMBER, Integer.parseInt(yytext())); }
-\s			{ /* nic */ }
+echo {
+    return new Symbol(sym.ECHO);
+}
+
+";" {
+    return new Symbol(sym.SEMICOLON);
+}
+
+\w+ {
+    return new Symbol(sym.TOKEN, yytext());
+}
+
+\s { /* nic */ }
