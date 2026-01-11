@@ -1,2 +1,2 @@
-echo one;
-echo two three;
+wc test/test.txt
+

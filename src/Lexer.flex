@@ -11,12 +11,24 @@ echo {
     return new Symbol(sym.ECHO);
 }
 
-";" {
-    return new Symbol(sym.SEMICOLON);
+cat {
+    return new Symbol(sym.CAT);
 }
 
-\w+ {
+wc {
+    return new Symbol(sym.WC);
+}
+
+
+[;\n\r]+ {
+    return new Symbol(sym.S_END, yytext());
+}
+
+[\w\/\.]+ {
     return new Symbol(sym.TOKEN, yytext());
 }
 
+
 \s { /* nic */ }
+
+. {/* nic */}

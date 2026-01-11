@@ -1,12 +1,15 @@
 import java_cup.runtime.*;
 
+import java.util.*;
+import java.io.*;
+
 /* TERMINAL */
 terminal
-	ECHO, SEMICOLON
+	ECHO, CAT, WC
 ;
 
 terminal String
-	TOKEN
+	TOKEN, S_END
 ;
 
 /* NON TERMINAL */
@@ -22,8 +25,34 @@ statement_list ::=
 ;
 
 statement ::=
-	ECHO token_list:tl SEMICOLON
+	ECHO token_list:tl S_END
 	{: System.out.println(tl); :}
+	|
+	CAT token_list:tl S_END
+	{:
+		for (var token: tl.split(" ")) {
+			var file = new File(token);
+			var scanner = new java.util.Scanner(file);
+			while (scanner.hasNextLine()) {
+				System.out.println(scanner.nextLine());
+			}
+			System.out.println();
+		}
+	:}
+	|
+	WC token_list:tl S_END
+	{: 
+		var count = 0;
+		for (var token: tl.split(" ")) {
+			var file = new File(token);
+			var scanner = new java.util.Scanner(file);
+			while (scanner.hasNextLine()) {
+				scanner.nextLine();
+				count++;
+			}
+			System.out.println(count);
+		}
+	:}
 ;
 
 token_list ::=
@@ -32,6 +61,7 @@ token_list ::=
 	| token_list:tl TOKEN:t
 	{: RESULT = tl + " " + t; :}
 ;
+
 
 
 
