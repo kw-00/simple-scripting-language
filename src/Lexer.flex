@@ -24,7 +24,15 @@ wc {
     return new Symbol(sym.S_END, yytext());
 }
 
-[\w\/\.]+ {
+> {
+    return new Symbol(sym.REDIR_W);
+}
+
+>> {
+    return new Symbol(sym.REDIR_A);
+}
+
+[\w\/\.,\?\!]+ {
     return new Symbol(sym.TOKEN, yytext());
 }
 

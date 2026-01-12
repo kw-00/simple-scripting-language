@@ -5,7 +5,7 @@ import java.io.*;
 
 /* TERMINAL */
 terminal
-	ECHO, CAT, WC
+	ECHO, CAT, WC, REDIR_W, REDIR_A
 ;
 
 terminal String
@@ -14,7 +14,7 @@ terminal String
 
 /* NON TERMINAL */
 non terminal String
-	statement_list, statement, token_list
+	statement_list, statement, call, token_list
 ;
 
 
@@ -25,33 +25,63 @@ statement_list ::=
 ;
 
 statement ::=
-	ECHO token_list:tl S_END
-	{: System.out.println(tl); :}
+	call:c S_END
+	{: System.out.print(c); :}
 	|
-	CAT token_list:tl S_END
+	call:c REDIR_W token_list:files S_END
 	{:
+		for (var path: files.split(" ")) {
+			var out = new PrintWriter(path);
+			out.print(c);
+			out.flush();
+		}
+	:}
+	|
+	call:c REDIR_A token_list:files S_END
+	{:
+		for (var path: files.split(" ")) {
+			var out = new PrintWriter(new FileWriter(path, true));
+			out.print(c);
+			out.flush();
+		}
+	:}
+;
+
+call ::=
+	ECHO
+	{: RESULT = "\n"; :}
+	|
+	ECHO token_list:tl
+	{: RESULT = tl + "\n"; :}
+	|
+	CAT token_list:tl
+	{:
+		var result = new StringBuilder();
 		for (var token: tl.split(" ")) {
 			var file = new File(token);
 			var scanner = new java.util.Scanner(file);
 			while (scanner.hasNextLine()) {
-				System.out.println(scanner.nextLine());
+				result.append(scanner.nextLine()).append("\n");
 			}
-			System.out.println();
+			result.append("\n");
 		}
+		RESULT = result.toString();
 	:}
 	|
-	WC token_list:tl S_END
+	WC token_list:tl
 	{: 
-		var count = 0;
+		var result = new StringBuilder();
 		for (var token: tl.split(" ")) {
+			var count = 0;
 			var file = new File(token);
 			var scanner = new java.util.Scanner(file);
 			while (scanner.hasNextLine()) {
 				scanner.nextLine();
 				count++;
 			}
-			System.out.println(count);
+			result.append(count).append(":");
 		}
+		RESULT = result.delete(result.length() - 1, result.length()).append("\n").toString();
 	:}
 ;
 
