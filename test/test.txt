@@ -1,2 +1,2 @@
-echo hello >> "file one.txt"
+cat;
 

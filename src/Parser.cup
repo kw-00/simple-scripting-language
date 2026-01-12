@@ -1,6 +1,7 @@
 import java_cup.runtime.*;
 
 import java.util.*;
+import java.util.function.*;
 import java.io.*;
 
 /* TERMINAL */
@@ -16,7 +17,7 @@ terminal String
 non terminal 
 	statement_list, statement
 ;
-non terminal String
+non terminal State.Result
 	call
 ;
 
@@ -34,30 +35,44 @@ statement_list ::=
 
 statement ::=
 	call:c S_END
-	{: System.out.print(c); :}
+	{: 
+		if (c.code > 0) {
+			System.err.println(c.value);
+		} else {
+			System.out.print(c.value); 
+		}
+	:}
 	|
 	call:c REDIR_W token_list:files S_END
 	{:
-		for (var path : files) {
-			var out = new PrintWriter(path);
-			out.print(c);
-			out.flush();
+		if (c.code > 0) {
+			System.err.println(c.value);
+		} else {
+			for (var path : files) {
+				var out = new PrintWriter(path);
+				out.print(c.value);
+				out.flush();
+			}
 		}
 	:}
 	|
 	call:c REDIR_A token_list:files S_END
 	{:
-		for (var path : files) {
-			var out = new PrintWriter(new FileWriter(path, true));
-			out.print(c);
-			out.flush();
+		if (c.code > 0) {
+			System.err.println(c.value);
+		} else {
+			for (var path : files) {
+				var out = new PrintWriter(new FileWriter(path, true));
+				out.print(c.value);
+				out.flush();
+			}
 		}
 	:}
 ;
 
 call ::=
 	ECHO
-	{: RESULT = "\n"; :}
+	{: RESULT = State.Result.success("\n"); :}
 	|
 	ECHO token_list:tl
 	{: 
@@ -66,7 +81,7 @@ call ::=
 			result.append(token).append(" ");
 		}
 		result.append("\n");
-		RESULT = result.toString();
+		RESULT = State.Result.success(result.toString());
 	:}
 	|
 	CAT token_list:files
@@ -80,8 +95,11 @@ call ::=
 			}
 			result.append("\n");
 		}
-		RESULT = result.toString();
+		RESULT = State.Result.success(result.toString());
 	:}
+	|
+	CAT
+	{: RESULT = State.Errors.NoArgs.get(); :}
 	|
 	WC token_list:files
 	{: 
@@ -96,8 +114,11 @@ call ::=
 			}
 			result.append(count).append(":");
 		}
-		RESULT = result.delete(result.length() - 1, result.length()).append("\n").toString();
+		RESULT = State.Result.success(result.delete(result.length() - 1, result.length()).append("\n").toString());
 	:}
+	|
+	WC
+	{: RESULT = State.Errors.NoArgs.get(); :}
 ;
 
 token_list ::=
