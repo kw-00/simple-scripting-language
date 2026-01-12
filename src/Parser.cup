@@ -20,7 +20,7 @@ non terminal String
 	call
 ;
 
-non terminal String
+non terminal List<String>
 	token_list
 ;
 
@@ -28,7 +28,8 @@ non terminal String
 /* PRODUCTION */
 statement_list ::=
 	statement
-	| statement_list statement
+	| 
+	statement_list statement
 ;
 
 statement ::=
@@ -37,7 +38,7 @@ statement ::=
 	|
 	call:c REDIR_W token_list:files S_END
 	{:
-		for (var path: files.split(" ")) {
+		for (var path : files) {
 			var out = new PrintWriter(path);
 			out.print(c);
 			out.flush();
@@ -46,7 +47,7 @@ statement ::=
 	|
 	call:c REDIR_A token_list:files S_END
 	{:
-		for (var path: files.split(" ")) {
+		for (var path : files) {
 			var out = new PrintWriter(new FileWriter(path, true));
 			out.print(c);
 			out.flush();
@@ -59,12 +60,19 @@ call ::=
 	{: RESULT = "\n"; :}
 	|
 	ECHO token_list:tl
-	{: RESULT = tl + "\n"; :}
+	{: 
+		var result = new StringBuilder();
+		for (var token : tl) {
+			result.append(token).append(" ");
+		}
+		result.append("\n");
+		RESULT = result.toString();
+	:}
 	|
-	CAT token_list:tl
+	CAT token_list:files
 	{:
 		var result = new StringBuilder();
-		for (var token: tl.split(" ")) {
+		for (var token : files) {
 			var file = new File(token);
 			var scanner = new java.util.Scanner(file);
 			while (scanner.hasNextLine()) {
@@ -75,10 +83,10 @@ call ::=
 		RESULT = result.toString();
 	:}
 	|
-	WC token_list:tl
+	WC token_list:files
 	{: 
 		var result = new StringBuilder();
-		for (var token: tl.split(" ")) {
+		for (var token : files) {
 			var count = 0;
 			var file = new File(token);
 			var scanner = new java.util.Scanner(file);
@@ -94,10 +102,13 @@ call ::=
 
 token_list ::=
 	TOKEN:t 
-	{: RESULT = t; :}
+	{: RESULT = Arrays.asList(t); :}
 	| 
 	token_list:tl TOKEN:t
-	{: RESULT = tl + " " + t; :}
+	{: 
+		tl.add(t);
+		RESULT = tl; 
+	:}
 ;
 
 
