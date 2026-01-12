@@ -6,7 +6,7 @@ import java.io.*;
 
 /* TERMINAL */
 terminal
-	ECHO, CAT, WC, REDIR_W, REDIR_A
+	ASSIGNMENT_OP, VAR_OP, REDIR_W, REDIR_A, ECHO, CAT, WC
 ;
 
 terminal String
@@ -71,6 +71,17 @@ statement ::=
 ;
 
 call ::=
+	TOKEN:name ASSIGNMENT_OP token_list:value 
+	{:
+		var result = new StringBuilder();
+		for (var el : value) {
+			result.append(el).append(" ");
+		}
+		var finalResult = result.toString().strip();
+		State.variables.put(name, finalResult);
+		RESULT = State.Result.success(finalResult);
+	:}
+	|
 	ECHO
 	{: RESULT = State.Result.success("\n"); :}
 	|

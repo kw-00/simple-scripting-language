@@ -7,6 +7,20 @@ import java_cup.runtime.*;
 
 %%
 
+/* Operators */
+= {
+    return new Symbol(sym.ASSIGNMENT_OP);
+}
+
+> {
+    return new Symbol(sym.REDIR_W);
+}
+
+>> {
+    return new Symbol(sym.REDIR_A);
+}
+
+/* Commands */
 echo {
     return new Symbol(sym.ECHO);
 }
@@ -19,19 +33,13 @@ wc {
     return new Symbol(sym.WC);
 }
 
-
+/* Statement End */
 [;\n\r]+ {
     return new Symbol(sym.S_END, yytext());
 }
 
-> {
-    return new Symbol(sym.REDIR_W);
-}
 
->> {
-    return new Symbol(sym.REDIR_A);
-}
-
+/* Tokens */
 \"(\\\"|\\|[^\"])*\" {
     return new Symbol(sym.TOKEN, yytext().substring(1, yytext().length() - 1).replaceAll("[\n\r]", ""));
 }

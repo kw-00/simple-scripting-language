@@ -3,6 +3,7 @@ import java.util.function.*;
 
 
 public class State {
+    /* Call Result */
     public static class Result {
 		/* 
 			Code of 0 means success. In case of success, value
@@ -34,4 +35,6 @@ public class State {
 	public static class Errors {
 		public static final Supplier<Result> NoArgs = () -> Result.error(1, "no_args");
 	}
+
+    public static Map<String, String> variables = new HashMap<>();
 }
