@@ -1,4 +1,2 @@
-echo Hi, > test/file.txt
-echo >> test/file.txt
-echo How are you? >> test/file.txt; echo It has been a while. >> test/file.txt;
-wc test/file.txt; cat test/file.txt
+echo hello >> "file one.txt"
+

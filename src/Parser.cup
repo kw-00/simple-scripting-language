@@ -13,8 +13,15 @@ terminal String
 ;
 
 /* NON TERMINAL */
+non terminal 
+	statement_list, statement
+;
 non terminal String
-	statement_list, statement, call, token_list
+	call
+;
+
+non terminal String
+	token_list
 ;
 
 
@@ -88,7 +95,8 @@ call ::=
 token_list ::=
 	TOKEN:t 
 	{: RESULT = t; :}
-	| token_list:tl TOKEN:t
+	| 
+	token_list:tl TOKEN:t
 	{: RESULT = tl + " " + t; :}
 ;
 

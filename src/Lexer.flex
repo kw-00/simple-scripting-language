@@ -32,6 +32,10 @@ wc {
     return new Symbol(sym.REDIR_A);
 }
 
+\"(\\\"|\\|[^\"])*\" {
+    return new Symbol(sym.TOKEN, yytext().substring(1, yytext().length() - 1).replaceAll("[\n\r]", ""));
+}
+
 [\w\/\.,\?\!]+ {
     return new Symbol(sym.TOKEN, yytext());
 }
