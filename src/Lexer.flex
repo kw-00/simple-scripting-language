@@ -12,6 +12,18 @@ import java_cup.runtime.*;
     return new Symbol(sym.ASSIGNMENT_OP);
 }
 
+\$ {
+    return new Symbol(sym.DOLLAR_OP);
+}
+
+\( {
+    return new Symbol(sym.L_PAREN);
+}
+
+\) {
+    return new Symbol(sym.R_PAREN);
+}
+
 > {
     return new Symbol(sym.REDIR_W);
 }

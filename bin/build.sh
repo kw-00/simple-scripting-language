@@ -25,7 +25,7 @@ cd "${base_path}"
 # Copy Main to the java folder, where it will be compiled 
 # together with the rest of the source files
 cp "${src_path}/Main.java" "${java_path}/Main.java"
-cp "${src_path}/State.java" "${java_path}/State.java"
+cp "${src_path}/Data.java" "${java_path}/Data.java"
  
 
 
