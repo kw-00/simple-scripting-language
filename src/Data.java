@@ -66,7 +66,7 @@ public class Data {
 		public static Result echo(List<String> args) {
 			var result = new StringBuilder();
 			for (var token : args) {
-				result.append(token).append(" ");
+				result.append(token.strip()).append(" ");
 			}
 			result.append("\n");
 			return Data.Result.success(result.toString());			

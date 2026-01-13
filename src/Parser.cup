@@ -18,281 +18,95 @@ terminal String
 ;
 
 /* NON TERMINAL */
-/* Mid Statements */
-non terminal List<String>
-	mid_shell
+non terminal 
+	program
 ;
 
 non terminal List<Data.Result>
-	mid_statement_list
-;
-
-non terminal Data.Result	
-	mid_statement
+	statement_list
 ;
 
 non terminal Data.Result
-	mid_call
+	statement
 ;
 
-non terminal List<String>
-	mid_value_list
-;
-
-non terminal List<String>
-	mid_value_sublist
-;
-
-
-/* Leaf Statements */
-non terminal List<String>
-	leaf_shell
-;
-
-non terminal List<Data.Result>
-	leaf_statement_list
-;
-non terminal Data.Result
-	leaf_statement
-;
 non terminal Data.Result
 	call
 ;
 
 non terminal List<String>
-	value_list
+	expression_list
 ;
 
 non terminal String
-	value
+	expression
 ;
-
 
 /* PRODUCTION */
-/* Mid Shell */
-mid_shell ::= 
-	DOLLAR_OP L_PAREN mid_statement_list:sl R_PAREN
+program ::=
+	statement_list:s_list
 	{:
-		Data.log("mid_shell ::= DOLLAR_OP L_PAREN mid_statement_list R_PAREN");
-		var result = new ArrayList<String>();
-		for (var s : sl) {
-			if (!s.value.isEmpty()) {
-				result.add(s.value);
-			}
+		for (var res : s_list) {
+			System.out.print(res.value);
 		}
-		RESULT = result;
 	:}
 ;
-	
-mid_statement_list ::=
-	mid_statement:s
+
+statement_list ::=
+	statement:s
 	{:
-		Data.log("mid_statement_list ::= mid_statement");
 		RESULT = new ArrayList<Data.Result>();
-		RESULT.add(s);
+		RESULT.add(s); 
 	:}
 	|
-	mid_statement_list:sl mid_statement:s
+	statement_list:s_list statement:s
 	{:
-		sl.add(s);
-		RESULT = sl;
+		s_list.add(s);
+		RESULT = s_list;
 	:}
 ;
 
-mid_statement ::=
-	mid_call:c S_END
-	{: 
-		Data.log("mid_statement ::= mid_call S_END");
-		RESULT = c;
-	:}
-	|
-	mid_call:c REDIR_W mid_value_list:files S_END
-	{:
-		Data.log("mid_statement ::= mid_call REDIR_A mid_value_list S_END");
-		RESULT = Data.Redirection.redirectWrite(c, files);
-	:}
-	|
-	mid_call:c REDIR_A mid_value_list:files S_END
-	{:
-		Data.log("mid_statement ::= mid_call REDIR_A mid_value_list S_END");
-		RESULT = Data.Redirection.redirectAppend(c, files);
-	:}
-;
-
-mid_call ::=
-	ECHO
-	{: 
-		Data.log("call ::= ECHO");
-		RESULT = Data.Commands.echo();
-	:}
-	|
-	ECHO value_list:vl
-	{: 
-		Data.log("call ::= ECHO value_list");
-		RESULT = Data.Commands.echo(vl);
-	:}
-;
-
-
-
-mid_value_list ::=
-	mid_value_sublist:sl
-	{:
-		Data.log("mid_value_list ::= mid_value_sublist");
-		RESULT = sl;
-	:}
-	|
-	mid_value_list:l mid_value_sublist:sl
-	{:
-		l.addAll(sl);
-		RESULT = l;
-	:}
-;
-
-mid_value_sublist ::=
-	leaf_shell:ls
-	{:
-		Data.log("mid_value_sublist ::= leaf_shell");
-		RESULT = ls;
-	:}
-	|
-	value_list:vl
-	{:
-		Data.log("mid_value_sublist ::= value_list");
-		RESULT = vl;
-	:}
-; 
-
-/* Leaf Shell */
-leaf_shell ::=
-	DOLLAR_OP L_PAREN leaf_statement_list:sl R_PAREN
-	{:
-		Data.log("leaf_shell ::= DOLLAR_OP L_PAREN leaf_statement_list R_PAREN");
-		var result = new ArrayList<String>();
-		for (var s : sl) {
-			if (!s.value.isEmpty()) {
-				result.add(s.value);
-			}
-		}
-		RESULT = result;
-	:}
-;
-
-leaf_statement_list ::=
-	leaf_statement:st
-	{: 
-		Data.log("leaf_statement_list ::= leaf_statement");
-		RESULT = new ArrayList<Data.Result>();
-		RESULT.add(st);
-	:}
-	| 
-	leaf_statement_list:sl leaf_statement:s
-	{:
-		Data.log("leaf_statement_list ::= leaf_statement_list leaf_statement");
-		sl.add(s);
-		RESULT = sl;
-	:}
-;
-
-leaf_statement ::=
+statement ::=
 	call:c S_END
 	{: 
-		Data.log("leaf_statement ::= call S_END");
 		RESULT = c;
-	:}
-	|
-	call:c REDIR_W value_list:files S_END
-	{:
-		Data.log("leaf_statement ::= call REDIR_A value_list S_END");
-		RESULT = Data.Redirection.redirectWrite(c, files);
-	:}
-	|
-	call:c REDIR_A value_list:files S_END
-	{:
-		Data.log("leaf_statement ::= call REDIR_A value_list S_END");
-		RESULT = Data.Redirection.redirectAppend(c, files);
 	:}
 ;
 
 call ::=
-	TOKEN:name ASSIGNMENT_OP value_list:vl
+	ECHO expression_list:e_list
 	{:
-		Data.log("call ::= TOKEN ASSIGNMENT_OP value_list");
-		RESULT = Data.Commands.assign(name, vl);
-	:}
-	|
-	ECHO
-	{: 
-		Data.log("call ::= ECHO");
-		RESULT = Data.Commands.echo();
-	:}
-	|
-	ECHO value_list:vl
-	{: 
-		Data.log("call ::= ECHO value_list");
-		RESULT = Data.Commands.echo(vl);
-	:}
-	|
-	CAT value_list:files
-	{:
-		Data.log("call ::= value_list");
-		RESULT = Data.Commands.cat(files);
-	:}
-	|
-	CAT
-	{:
-		Data.log("call ::= CAT"); 
-		RESULT = Data.Commands.cat();
-	:}
-	|
-	WC value_list:files
-	{: 
-		Data.log("call ::= WC value_list");
-		RESULT = Data.Commands.wc(files);
-	:}
-	|
-	WC
-	{: 
-		Data.log("call ::= WC");
-		RESULT = Data.Commands.wc(); 
+		RESULT = Data.Commands.echo(e_list);
 	:}
 ;
 
-value_list ::=
-	value:v
-	{: 
-		Data.log("value_list ::= value");
+expression_list ::=
+	expression:e
+	{:
 		RESULT = new ArrayList<String>();
-		RESULT.add(v);
-	:}
-	| 
-	value_list:vl value:v
-	{: 
-		Data.log("value_list ::= value_list value");
-		vl.add(v);
-		RESULT = vl; 
-	:}
-;
-
-value ::=
-	TOKEN:t
-	{: 
-		Data.log("value ::= TOKEN(" + t + ")");
-		RESULT = t; 
+		RESULT.add(e);
 	:}
 	|
-	DOLLAR_OP TOKEN:name
+	expression_list:e_list expression:e
 	{:
-		Data.log("value ::= DOLLAR_OP TOKEN($" + name + ")");
-		var result = Data.variables.get(name);
-		if (result == null) {
-			RESULT = Data.Errors.VarUndefined.get().value;
-		} else {
-			RESULT = Data.Result.success(result).value;
-		}
+		e_list.add(e);
+		RESULT = e_list;
 	:}
 ;
 
+expression ::=
+	TOKEN:t
+	{: RESULT = t; :}
+	|
+	DOLLAR_OP L_PAREN statement_list:s_list R_PAREN
+	{: 
+		var result = new StringBuilder();
+		for (var res : s_list) {
+			result.append(res.value.strip()).append(" ");
+		}
+		RESULT = result.toString().strip();
+	:}
+;
 
 
 
