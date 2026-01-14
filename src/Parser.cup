@@ -9,12 +9,11 @@ terminal
 	ASSIGNMENT_OP, 
 	DOLLAR_OP, 
 	L_PAREN, R_PAREN, 
-	REDIR_W, REDIR_A, 
-	ECHO, CAT, WC
+	REDIR_W, REDIR_A
 ;
 
 terminal String
-	TOKEN, S_END
+	COMMAND, TOKEN, S_END
 ;
 
 /* NON TERMINAL */
@@ -27,11 +26,7 @@ non terminal List<Data.Result>
 ;
 
 non terminal Data.Result
-	statement
-;
-
-non terminal Data.Result
-	call
+	statement, command
 ;
 
 non terminal List<String>
@@ -59,24 +54,51 @@ statement_list ::=
 		RESULT.add(s); 
 	:}
 	|
-	statement_list:s_list statement:s
+	statement_list:s_list S_END statement:s
 	{:
 		s_list.add(s);
+		RESULT = s_list;
+	:}
+	|
+	statement_list:s_list S_END
+	{:
 		RESULT = s_list;
 	:}
 ;
 
 statement ::=
-	call:c S_END
-	{: 
+	command:c
+	{:
 		RESULT = c;
+	:}
+	|
+	expression:name ASSIGNMENT_OP expression:value
+	{:
+		RESULT = Data.Operators.assign(name, value);
 	:}
 ;
 
-call ::=
-	ECHO expression_list:e_list
+command ::=
+	COMMAND:c
 	{:
-		RESULT = Data.Commands.echo(e_list);
+		RESULT = Data.commands.get(c).apply(null, null);
+	:}
+	|
+	COMMAND:c expression_list:args
+	{:
+		RESULT = Data.commands.get(c).apply(null, args);
+	:}
+	|
+	COMMAND:c expression_list:args REDIR_W expression_list:files
+	{:
+		var commandResult = Data.commands.get(c).apply(null, args);
+		RESULT = Data.Redirection.redirectWrite(commandResult, files);
+	:}
+	|
+	COMMAND:c expression_list:args REDIR_A expression_list:files
+	{:
+		var commandResult = Data.commands.get(c).apply(null, args);
+		RESULT = Data.Redirection.redirectAppend(commandResult, files);
 	:}
 ;
 
@@ -94,7 +116,8 @@ expression_list ::=
 	:}
 ;
 
-expression ::=
+/* Not here */
+expression ::= 
 	TOKEN:t
 	{: RESULT = t; :}
 	|
@@ -105,6 +128,11 @@ expression ::=
 			result.append(res.value.strip()).append(" ");
 		}
 		RESULT = result.toString().strip();
+	:}
+	|
+	DOLLAR_OP expression:e
+	{:
+		RESULT = Data.Operators.getVariable(e);
 	:}
 ;
 

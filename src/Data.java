@@ -25,7 +25,7 @@ public class Data {
 		private Result(String value, int code) {
 			this.value = value;
 			this.code = code;
-            Data.lastExitCode = code;
+            Data.variables.put("?", "" + code);
 		}
 
 		public static Result success(String value) {
@@ -33,78 +33,101 @@ public class Data {
 		}
 
 		public static Result error(int code, String error) {
-			return new Result(error, code);
+			Data.variables.put("ERROR_MESSAGE", error);
+			return new Result("", code);
 		}
 	}
 
-    public static int lastExitCode = 0;
-
 	/* Errors */
 	public static class Errors {
-		public static final Supplier<Result> NoArgs = () -> Result.error(1, "no_args");
-        public static final Supplier<Result> VarUndefined = () -> Result.error(2, "var_undefined");
-		public static final Supplier<Result> IOException = () -> Result.error(3, "io_exception");
+		public static final Supplier<Result> NoArgs = () -> Result.error(1, "no_args\n");
+        public static final Supplier<Result> VarUndefined = () -> Result.error(2, "var_undefined\n");
+		public static final Supplier<Result> IOException = () -> Result.error(3, "io_exception\n");
 	}
 
 	/* Variables */
     public static Map<String, String> variables = new HashMap<>();
 
-	/* Commands */
-	public static class Commands {
+	/* Operators */
+	public static class Operators {
 		/* = (assign) */
-		public static Result assign(String name, List<String> args) {
-			var result = new StringBuilder();
-			for (var arg : args) {
-				result.append(arg).append(" ");
+		public static Result assign(String name, String value) {
+			Data.variables.put(name, value);
+			return Data.Result.success("");
+		}
+
+		/* $variable */
+		public static String getVariable(String name) {
+			var result = Data.variables.get(name);
+			if (result == null) {
+				return "";
 			}
-			var finalResult = result.toString().strip();
-			Data.variables.put(name, finalResult);
-			return Data.Result.success(finalResult);
+			return result;
 		}
-
-		/* echo */
-		public static Result echo(List<String> args) {
-			var result = new StringBuilder();
-			for (var token : args) {
-				result.append(token.strip()).append(" ");
+	}
+	/* Commands */
+	public static Map<String, BiFunction<Result, List<String>, Result>> commands = new HashMap<>();
+	/* echo */
+	static {
+		Data.commands.put("echo", (in, args) -> {
+			if (in == null && args == null) {
+				return Data.Result.success("\n");
 			}
-			result.append("\n");
-			return Data.Result.success(result.toString());			
-		}
-
-		public static Result echo() {
-			return Data.Result.success("\n");
-		}
-
-		/* cat */
-		public static Result cat(List<String> args) {
-			boolean errorOccurred = false;
 			var result = new StringBuilder();
-			for (var token : args) {
-				var file = new File(token);
-				try (java.util.Scanner scanner = new java.util.Scanner(file)){
-					while (scanner.hasNextLine()) {
-						result.append(scanner.nextLine()).append("\n");
-					}
-					result.append("\n");
-				} catch (IOException e) {
-					errorOccurred = true;
-					break;
+			if (in != null) {
+				result.append(in.value.strip()).append(" ");
+			}
+
+			if (args != null) {
+				for (var token : args) {
+					result.append(token.strip()).append(" ");
 				}
 			}
+			result.append("\n");
+			return Data.Result.success(result.toString());	
+		});
+
+		/* cat */
+		Data.commands.put("cat", (in, args) -> {
+			if (in == null && args == null) {
+				return Data.Errors.NoArgs.get();
+			}
+			var input = new ArrayList<String>();
+
+			if (in != null) input.add(in.value);
+			if (args != null) input.addAll(args);
+
+			boolean errorOccurred = false;
+			var result = new StringBuilder();
+			for (var token : input) {
+				var file = new File(token);
+				try (java.util.Scanner scanner = new java.util.Scanner(file)){
+						while (scanner.hasNextLine()) {
+							result.append(scanner.nextLine()).append("\n");
+						}
+						result.append("\n");
+					} catch (IOException e) {
+						errorOccurred = true;
+						break;
+					}
+				}
 			if (!errorOccurred) {
 				return Data.Result.success(result.toString());
 			} else {
 				return Data.Errors.IOException.get();
 			}
-		}
-
-		public static Result cat() {
-			return Data.Errors.NoArgs.get();
-		}
+		});
 
 		/* wc */
-		public static Result wc(List<String> args) {
+		Data.commands.put("wc", (in, args) -> {
+			if (in == null && args == null) {
+				return Data.Errors.NoArgs.get();
+			}
+			var input = new ArrayList<String>();
+
+			if (in != null) input.add(in.value);
+			if (args != null) input.addAll(args);
+
 			boolean errorOccurred = false;
 			var result = new StringBuilder();
 			for (var token : args) {
@@ -126,11 +149,7 @@ public class Data {
 			} else {
 				return Data.Errors.IOException.get();
 			}
-		}
-
-		public static Result wc() {
-			return Data.Errors.NoArgs.get();
-		}
+		});
 	}
 
 	public static class Redirection {

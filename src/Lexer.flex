@@ -24,25 +24,29 @@ import java_cup.runtime.*;
     return new Symbol(sym.R_PAREN);
 }
 
-> {
-    return new Symbol(sym.REDIR_W);
-}
-
 >> {
     return new Symbol(sym.REDIR_A);
 }
 
+> {
+    return new Symbol(sym.REDIR_W);
+}
+
+// || {
+//     return new Symbol(sym.OR);
+// }
+
+// && {
+//     return new Sumbol(sym.AND);
+// }
+
+// | {
+//     return new Symbol(sym.)
+// }
+
 /* Commands */
-echo {
-    return new Symbol(sym.ECHO);
-}
-
-cat {
-    return new Symbol(sym.CAT);
-}
-
-wc {
-    return new Symbol(sym.WC);
+echo|cat|wc {
+    return new Symbol(sym.COMMAND, yytext());
 }
 
 /* Statement End */
