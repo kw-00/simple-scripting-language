@@ -14,7 +14,7 @@ terminal
 ;
 
 terminal String
-	COMMAND, TOKEN, STRING, S_END
+	COMMAND, TOKEN, STRING, S_END, SP
 ;
 
 /* NON TERMINAL */
@@ -28,6 +28,10 @@ non terminal List<Data.Result>
 
 non terminal Data.Result
 	statement, command
+;
+
+non terminal String
+	sp_or_nothing
 ;
 
 non terminal List<String>
@@ -58,7 +62,7 @@ statement_list ::=
 		RESULT.add(s); 
 	:}
 	|
-	statement_list:s_list S_END statement:s
+	statement_list:s_list S_END sp_or_nothing statement:s
 	{:
 		s_list.add(s);
 		RESULT = s_list;
@@ -71,7 +75,7 @@ statement_list ::=
 ;
 
 statement ::=
-	command:c
+	command:c sp_or_nothing
 	{:
 		RESULT = c;
 	:}
@@ -83,26 +87,38 @@ statement ::=
 ;
 
 command ::=
-	COMMAND:c expression_list_or_nothing:args
+	COMMAND:c SP expression_list_or_nothing:args
 	{:
 		RESULT = Data.commands.get(c).apply(null, args);
 	:}
 	|
-	command:prev PIPE COMMAND:c expression_list_or_nothing:args
+	command:prev sp_or_nothing PIPE sp_or_nothing COMMAND:c SP expression_list_or_nothing:args
 	{:
 		RESULT = Data.commands.get(c).apply(prev, args);
 	:}
 	|
-	command:c REDIR_W expression_list:files
+	command:c sp_or_nothing REDIR_W sp_or_nothing expression_list:files
 	{:
 		RESULT = Data.Redirection.redirectWrite(c, files);
 	:}
 	|
-	command:c REDIR_A expression_list:files
+	command:c sp_or_nothing REDIR_A sp_or_nothing expression_list:files
 	{:
 		RESULT = Data.Redirection.redirectAppend(c, files);
 	:}
 ;
+
+sp_or_nothing ::=
+	{: 
+		RESULT = "";
+	:}
+	|
+	SP:s
+	{:
+		RESULT = s;
+	:}
+;
+
 
 expression_list_or_nothing ::=
 	{:

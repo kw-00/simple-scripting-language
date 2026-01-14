@@ -38,7 +38,7 @@ import java_cup.runtime.*;
 
 
 /* Commands */
-echo|cat|wc {
+echo|cat|wc|grep {
     return new Symbol(sym.COMMAND, yytext());
 }
 
@@ -58,6 +58,8 @@ echo|cat|wc {
 }
 
 
-\s { /* nic */ }
+\s+ {
+    return new Symbol(sym.SP, yytext());
+}
 
 . {/* nic */}

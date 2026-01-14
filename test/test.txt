@@ -1,2 +1,0 @@
-echo text me | echo too >> test/out.txt
-

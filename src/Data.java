@@ -33,7 +33,7 @@ public class Data {
 		}
 
 		public static Result error(int code, String error) {
-			Data.variables.put("ERROR_MESSAGE", error);
+			Data.variables.put("ERROR", error);
 			System.err.println("Error: " + error);
 			return new Result("", code);
 		}
@@ -42,8 +42,9 @@ public class Data {
 	/* Errors */
 	public static class Errors {
 		public static final Supplier<Result> NoArgs = () -> Result.error(1, "no_args");
-        public static final Supplier<Result> VarUndefined = () -> Result.error(2, "var_undefined");
-		public static final Supplier<Result> IOException = () -> Result.error(3, "io_exception");
+		public static final Supplier<Result> NoInput = () -> Result.error(2, "no_input");
+        public static final Supplier<Result> VarUndefined = () -> Result.error(3, "var_undefined");
+		public static final Supplier<Result> IOException = () -> Result.error(4, "io_exception");
 	}
 
 	/* Variables */
@@ -148,6 +149,29 @@ public class Data {
 			} else {
 				return Data.Errors.IOException.get();
 			}
+		});
+
+		/* grep */
+		Data.commands.put("grep", (in, args) -> {
+			if (in == null) {
+				return Data.Errors.NoInput.get();
+			}
+			var result = new StringBuilder();
+			var scanner = new Scanner(in.value);
+			while (scanner.hasNextLine()) {
+				var line = scanner.nextLine();
+				var match = true;
+				for (var regex : args) {
+					if (!line.contains(regex)) {
+						match = false;
+						break;
+					}
+				}
+				if (match) {
+					result.append(line).append("\n");
+				}
+			}
+			return Data.Result.success(result.toString());
 		});
 	}
 
