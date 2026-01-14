@@ -12,11 +12,11 @@ public class Main {
             // Command prompt
             var line = scanner.nextLine();
             // Block (BEGIN/END)
-            if (line.equals("BEGIN")) {
+            if (line.strip().equals("BEGIN")) {
                 var prompt = new StringBuilder();
                 while (scanner.hasNextLine()) {
                     line = scanner.nextLine();
-                    if (line.equals("END")) {
+                    if (line.strip().equals("END")) {
                         try (var reader = new StringReader(prompt.toString())) {
                             parser p = new parser(new Lexer(reader));
                             p.parse();

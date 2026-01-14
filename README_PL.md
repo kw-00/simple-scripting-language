@@ -1,5 +1,22 @@
 # Parser bashopodobny
 
+## Ważne!
+Aby wykonać program zajmujący wiele linijek, należy uprzedzić jego pisanie komendą ***BEGIN***, a następnie wykonać przy pomocy komendy ***END***.
+
+Na przykład:
+```
+BEGIN
+echo "
+a
+b
+c
+ab" | grep b
+END
+// Wynik:
+// a
+// ab
+```
+
 ## Zrealizowane punkty
 - **Interpreter** -- działa zarówno w sposób tradycyjny (polecenie->ENTER-> wynik->następne polecenie) jak i przy pomocy bloku (BEGIN ...polecenia... END -> wynik)
 - **Funkcjonalność bazowa** -- podobnie jak w poleceniu, z małymi różnicami:
