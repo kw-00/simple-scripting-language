@@ -24,6 +24,10 @@ import java_cup.runtime.*;
     return new Symbol(sym.R_PAREN);
 }
 
+\| {
+    return new Symbol(sym.PIPE);
+}
+
 >> {
     return new Symbol(sym.REDIR_A);
 }
@@ -32,17 +36,6 @@ import java_cup.runtime.*;
     return new Symbol(sym.REDIR_W);
 }
 
-// || {
-//     return new Symbol(sym.OR);
-// }
-
-// && {
-//     return new Sumbol(sym.AND);
-// }
-
-// | {
-//     return new Symbol(sym.)
-// }
 
 /* Commands */
 echo|cat|wc {
@@ -56,8 +49,8 @@ echo|cat|wc {
 
 
 /* Tokens */
-\"(\\\"|\\|[^\"])*\" {
-    return new Symbol(sym.TOKEN, yytext().substring(1, yytext().length() - 1).replaceAll("[\n\r]", ""));
+\"(\\\"|\\\\|[^\"\\])*\" {
+    return new Symbol(sym.STRING, yytext().substring(1, yytext().length() - 1));
 }
 
 [\w\/\.,\?\!]+ {

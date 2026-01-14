@@ -8,12 +8,13 @@ import java.io.*;
 terminal
 	ASSIGNMENT_OP, 
 	DOLLAR_OP, 
-	L_PAREN, R_PAREN, 
+	L_PAREN, R_PAREN,
+	PIPE,
 	REDIR_W, REDIR_A
 ;
 
 terminal String
-	COMMAND, TOKEN, S_END
+	COMMAND, TOKEN, STRING, S_END
 ;
 
 /* NON TERMINAL */
@@ -30,6 +31,7 @@ non terminal Data.Result
 ;
 
 non terminal List<String>
+	expression_list_or_nothing, 
 	expression_list
 ;
 
@@ -42,7 +44,9 @@ program ::=
 	statement_list:s_list
 	{:
 		for (var res : s_list) {
-			System.out.print(res.value);
+			if (res.code == 0) {
+				System.out.print(res.value);
+			}
 		}
 	:}
 ;
@@ -79,26 +83,35 @@ statement ::=
 ;
 
 command ::=
-	COMMAND:c
-	{:
-		RESULT = Data.commands.get(c).apply(null, null);
-	:}
-	|
-	COMMAND:c expression_list:args
+	COMMAND:c expression_list_or_nothing:args
 	{:
 		RESULT = Data.commands.get(c).apply(null, args);
 	:}
 	|
-	COMMAND:c expression_list:args REDIR_W expression_list:files
+	command:prev PIPE COMMAND:c expression_list_or_nothing:args
 	{:
-		var commandResult = Data.commands.get(c).apply(null, args);
-		RESULT = Data.Redirection.redirectWrite(commandResult, files);
+		RESULT = Data.commands.get(c).apply(prev, args);
 	:}
 	|
-	COMMAND:c expression_list:args REDIR_A expression_list:files
+	command:c REDIR_W expression_list:files
 	{:
-		var commandResult = Data.commands.get(c).apply(null, args);
-		RESULT = Data.Redirection.redirectAppend(commandResult, files);
+		RESULT = Data.Redirection.redirectWrite(c, files);
+	:}
+	|
+	command:c REDIR_A expression_list:files
+	{:
+		RESULT = Data.Redirection.redirectAppend(c, files);
+	:}
+;
+
+expression_list_or_nothing ::=
+	{:
+		RESULT = new ArrayList<String>();
+	:}
+	|
+	expression_list:e_list
+	{:
+		RESULT = e_list;
 	:}
 ;
 
@@ -120,6 +133,11 @@ expression_list ::=
 expression ::= 
 	TOKEN:t
 	{: RESULT = t; :}
+	|
+	STRING:s 
+	{:
+		RESULT = s.replace("\\\\", "\\").replace("\\\"", "\"");
+	:}
 	|
 	DOLLAR_OP L_PAREN statement_list:s_list R_PAREN
 	{: 

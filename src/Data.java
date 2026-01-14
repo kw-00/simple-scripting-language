@@ -34,15 +34,16 @@ public class Data {
 
 		public static Result error(int code, String error) {
 			Data.variables.put("ERROR_MESSAGE", error);
+			System.err.println("Error: " + error);
 			return new Result("", code);
 		}
 	}
 
 	/* Errors */
 	public static class Errors {
-		public static final Supplier<Result> NoArgs = () -> Result.error(1, "no_args\n");
-        public static final Supplier<Result> VarUndefined = () -> Result.error(2, "var_undefined\n");
-		public static final Supplier<Result> IOException = () -> Result.error(3, "io_exception\n");
+		public static final Supplier<Result> NoArgs = () -> Result.error(1, "no_args");
+        public static final Supplier<Result> VarUndefined = () -> Result.error(2, "var_undefined");
+		public static final Supplier<Result> IOException = () -> Result.error(3, "io_exception");
 	}
 
 	/* Variables */
@@ -70,7 +71,7 @@ public class Data {
 	/* echo */
 	static {
 		Data.commands.put("echo", (in, args) -> {
-			if (in == null && args == null) {
+			if (in == null && args.isEmpty()) {
 				return Data.Result.success("\n");
 			}
 			var result = new StringBuilder();
@@ -78,10 +79,8 @@ public class Data {
 				result.append(in.value.strip()).append(" ");
 			}
 
-			if (args != null) {
-				for (var token : args) {
-					result.append(token.strip()).append(" ");
-				}
+			for (var token : args) {
+				result.append(token.strip()).append(" ");
 			}
 			result.append("\n");
 			return Data.Result.success(result.toString());	
@@ -89,13 +88,13 @@ public class Data {
 
 		/* cat */
 		Data.commands.put("cat", (in, args) -> {
-			if (in == null && args == null) {
+			if (in == null && args.isEmpty()) {
 				return Data.Errors.NoArgs.get();
 			}
 			var input = new ArrayList<String>();
 
 			if (in != null) input.add(in.value);
-			if (args != null) input.addAll(args);
+			input.addAll(args);
 
 			boolean errorOccurred = false;
 			var result = new StringBuilder();
@@ -120,13 +119,13 @@ public class Data {
 
 		/* wc */
 		Data.commands.put("wc", (in, args) -> {
-			if (in == null && args == null) {
+			if (in == null && args.isEmpty()) {
 				return Data.Errors.NoArgs.get();
 			}
 			var input = new ArrayList<String>();
 
 			if (in != null) input.add(in.value);
-			if (args != null) input.addAll(args);
+			input.addAll(args);
 
 			boolean errorOccurred = false;
 			var result = new StringBuilder();

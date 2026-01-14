@@ -1,13 +1,2 @@
-hello 
-hello 
-
-a=2
-echo $a >> test/out.txt
-hello 
-hello 
-hello 
-hello 
-hello 
-hello 
-hello 
-hello 
+text me too 
+text me too 

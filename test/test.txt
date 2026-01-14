@@ -1,3 +1,2 @@
-a=1
-echo $a
+echo text me | echo too >> test/out.txt
 
