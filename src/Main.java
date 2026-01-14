@@ -10,13 +10,13 @@ public class Main {
         var scanner = new Scanner(System.in);
         while (scanner.hasNextLine()) {
             // Command prompt
-            var line = scanner.nextLine();
+            var line = scanner.nextLine().strip();
             // Block (BEGIN/END)
-            if (line.strip().equals("BEGIN")) {
+            if (line.equals("BEGIN")) {
                 var prompt = new StringBuilder();
                 while (scanner.hasNextLine()) {
                     line = scanner.nextLine();
-                    if (line.strip().equals("END")) {
+                    if (line.equals("END")) {
                         try (var reader = new StringReader(prompt.toString())) {
                             parser p = new parser(new Lexer(reader));
                             p.parse();
