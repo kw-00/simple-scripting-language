@@ -67,6 +67,7 @@ public class Data {
 			return result;
 		}
 	}
+	
 	/* Commands */
 	public static Map<String, BiFunction<Result, List<String>, Result>> commands = new HashMap<>();
 	/* echo */
